@@ -2,7 +2,7 @@ from setuptools import find_packages, setup
 
 setup(
     name="netbox-business-application",
-    version="1.0.0",
+    version="0.0.1",
     description="A NetBox plugin to manage business applications and their relationships to virtual machines.",
     long_description=open("README.md").read(),
     long_description_content_type="text/markdown",
@@ -12,7 +12,7 @@ setup(
     packages=find_packages(),
     include_package_data=True,
     install_requires=[
-        "netbox>=4.1.7",
+        "netbox>=4.1.0",
         "django-filter>=21.1",
     ],
     license="MIT",
