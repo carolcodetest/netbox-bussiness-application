@@ -24,7 +24,9 @@ app_buttons = [
         ]
     )
 ]
-if (HAVE_MENU and settings.PLUGINS_CONFIG['netbox_inventory']['top_level_menu']):
+plugin_settings = settings.PLUGINS_CONFIG.get('netbox_bgp', {})
+
+if plugin_settings.get('top_level_menu'):
     # add a top level entry
     menu = PluginMenu(
         label=f'Bussiness Applications',
