@@ -1,0 +1,2 @@
+netbox>=4.1.0
+django-filter>=21.1
