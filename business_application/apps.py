@@ -8,9 +8,12 @@ class BusinessApplicationConfig(PluginConfig):
     author = "Your Name"
     author_email = "your.email@example.com"
     base_url = "business-application"  # URL base for the plugin
-    default_settings = {}  # Define default plugin settings if needed
     required_settings = []  # Define required settings if applicable
     min_version = "4.1.0"  # Minimum required NetBox version
-
+    max_version = "4.1.99"  # Minimum required NetBox version
+    default_settings = {
+        'device_ext_page': 'right',
+        'top_level_menu' : True,
+    }
 # Required for NetBox to recognize the plugin
 config = BusinessApplicationConfig
