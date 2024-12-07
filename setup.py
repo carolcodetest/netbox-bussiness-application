@@ -11,10 +11,6 @@ setup(
     url="https://github.com/your-repo/netbox-business-application",
     packages=find_packages(),
     include_package_data=True,
-    install_requires=[
-        "netbox>=4.1.0",
-        "django-filter>=21.1",
-    ],
     license="MIT",
     classifiers=[
         "Framework :: Django",
