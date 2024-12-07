@@ -1,4 +1,4 @@
-from extras.plugins import PluginConfig
+from netbox.plugins import PluginConfig
 
 class BusinessApplicationConfig(PluginConfig):
     name = "business_application"  # Must match the plugin directory name
