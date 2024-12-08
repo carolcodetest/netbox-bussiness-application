@@ -1,0 +1,5 @@
+include README.md
+include LICENSE
+recursive-include business_application/templates *
+recursive-include business_application/static *
+recursive-include business_application/migrations *
