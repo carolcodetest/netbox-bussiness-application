@@ -12,7 +12,7 @@ class BusinessApplicationFilter(NetBoxModelFilterSet):
             return queryset
         qs_filter = (
             Q(name__icontains=value)
-            | Q(appcode_icontains=value)
+            | Q(appcode__icontains=value)
         )
         return queryset.filter(qs_filter)
 
