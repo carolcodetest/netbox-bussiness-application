@@ -1,6 +1,7 @@
 from django.db import models
 from netbox.models import NetBoxModel
 from virtualization.models import VirtualMachine
+from dcim.models import Device
 from django.urls import reverse
 
 class BusinessApplication(NetBoxModel):
@@ -18,10 +19,15 @@ class BusinessApplication(NetBoxModel):
         related_name="business_applications",
         blank=True
     )
+    devices = models.ManyToManyField(
+        Device,
+        related_name="business_applications",
+        blank=True
+    )
 
     class Meta:
         ordering = ['name']
-    
+
     def get_absolute_url(self):
         """
         Returns the URL to access a detail view of this object.
