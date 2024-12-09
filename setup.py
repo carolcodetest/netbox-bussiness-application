@@ -2,7 +2,7 @@ from setuptools import find_packages, setup
 
 setup(
     name="netbox-business-application",
-    version="1.0.1",
+    version="1.0.2",
     description="A NetBox plugin to manage business applications and their relationships to virtual machines.",
     long_description=open("README.md").read(),
     long_description_content_type="text/markdown",
