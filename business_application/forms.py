@@ -15,4 +15,5 @@ class BusinessApplicationForm(forms.ModelForm):
             'delegate',
             'servicenow',
             'virtual_machines',
+            'devices'
         ]
