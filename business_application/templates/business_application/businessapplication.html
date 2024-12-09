@@ -85,6 +85,35 @@
                 {% endif %}
             </div>
         </div>
+        <div class="card">
+            <h5 class="card-header">
+                Associated Devices
+            </h5>
+            <div class="card-body">
+                {% if object.virtual_machines.count > 0 %}
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Type</th>
+                                <th>Role</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for device in object.devices.all %}
+                            <tr>
+                                <td><a href="{{ device.get_absolute_url }}">{{ device.name }}</a></td>
+                                <td>{{ device.type.name|default:"N/A" }}</td>
+                                <td>{{ device.role.name|default:"N/A" }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                {% else %}
+                    <p>No associated devices.</p>
+                {% endif %}
+            </div>
+        </div>
         {% plugin_right_page object %}
     </div>
 </div>
