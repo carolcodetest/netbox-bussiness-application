@@ -3,6 +3,7 @@ from django.db.models import Q
 
 from .models import BusinessApplication
 from .tables import BusinessApplicationTable
+from virtualization.models import VirtualMachine
 
 class AppCodeExtension(PluginTemplateExtension):
     def left_page(self):
@@ -68,8 +69,25 @@ class VMAppCodeExtension(AppCodeExtension):
         return BusinessApplicationTable(
             BusinessApplication.objects.filter(virtual_machines=obj)
         )
+        
+class ClusterAppCodeExtension(AppCodeExtension):
+    model = 'virtualization.cluster'
+    def right_page(self):
+        obj = self.context['object']
+        virtual_machines = VirtualMachine.objects.filter(cluster=obj).prefetch_related('business_applications')
+        app_codes = set()
+        for vm in virtual_machines:
+            for app in vm.business_applications.all():
+                app_codes.add(app.appcode)
+        return self.render(
+            'business_application/cluster_extend.html',
+            extra_context={
+                'downstream_app_codes': sorted(list(app_codes)),
+            }
+        )
 
 template_extensions = [
     DeviceAppCodeExtension,
-    VMAppCodeExtension
+    VMAppCodeExtension,
+    ClusterAppCodeExtension,
 ]
