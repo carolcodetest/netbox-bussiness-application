@@ -1,7 +1,12 @@
+from django.urls import path, include
 from rest_framework.routers import DefaultRouter
-from business_application.api.views import BusinessApplicationViewSet
+from .api.views import BusinessApplicationViewSet, DeviceDownstreamAppsViewSet, ClusterDownstreamAppsViewSet
 
 router = DefaultRouter()
-router.register(r'business-applications', BusinessApplicationViewSet, basename='businessapplication')
+router.register(r'business-applications', BusinessApplicationViewSet)
+router.register(r'devices', DeviceDownstreamAppsViewSet, basename='device-downstream-apps')
+router.register(r'clusters', ClusterDownstreamAppsViewSet, basename='cluster-downstream-apps')
 
-urlpatterns = router.urls
+urlpatterns = [
+    path('', include(router.urls)),
+]
