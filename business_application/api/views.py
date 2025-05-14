@@ -112,6 +112,7 @@ class ClusterDownstreamAppsViewSet(ModelViewSet):
         for vm in virtual_machines:
             apps.update(BusinessApplication.objects.filter(virtual_machines=vm))
             if vm.host and vm.host not in processed_devices:
+                # Similar downstream logic as DeviceDownstreamAppsViewSet, starting from the host
                 nodes = [vm.host]
                 visited_ids = {vm.host.id}
                 current = 0
