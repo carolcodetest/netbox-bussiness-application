@@ -105,7 +105,7 @@ class ClusterAppCodeExtension(AppCodeExtension):
                 processed_devices.add(vm.host)
 
         return self.render(
-            'business_application/extend.html',  # Use the same template as devices
+            'business_application/cluster_extend.html',  # Render the correct template
             extra_context={
                 'related_appcodes': BusinessApplicationTable(related_apps_via_vm),
                 'downstream_appcodes': BusinessApplicationTable(list(downstream_apps)),
