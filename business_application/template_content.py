@@ -75,40 +75,38 @@ class ClusterAppCodeExtension(AppCodeExtension):
     model = 'virtualization.cluster'
     def right_page(self):
         obj = self.context['object']
+        apps = set()
+        nodes = []
+        visited_ids = set()
         vms = VirtualMachine.objects.filter(cluster=obj)
-
-        # Related App Codes (via VMs)
-        related_apps_via_vm = BusinessApplication.objects.filter(virtual_machines__in=vms).distinct()
-
-        # Downstream App Codes (via VMs and their devices)
-        downstream_apps = set()
-        processed_devices = set()
         for vm in vms:
-            downstream_apps.update(BusinessApplication.objects.filter(virtual_machines=vm))
-            if vm.host and vm.host not in processed_devices:
-                nodes = [vm.host]
-                visited_ids = {vm.host.id}
-                current = 0
-                while current < len(nodes):
-                    node = nodes[current]
-                    downstream_apps.update(BusinessApplication.objects.filter(Q(devices=node) | Q(virtual_machines__device=node)))
-                    for cable_termination in node.cabletermination_set.all():
-                        for termination in cable_termination.cable.b_terminations:
-                            if hasattr(termination, 'device') and termination.device and termination.device.id not in visited_ids:
-                                nodes.append(termination.device)
-                                visited_ids.add(termination.device.id)
-                        for termination in cable_termination.cable.a_terminations:
-                            if hasattr(termination, 'device') and termination.device and termination.device.role == node.role and termination.device.id not in visited_ids:
-                                nodes.append(termination.device)
-                                visited_ids.add(termination.device.id)
-                    current += 1
-                processed_devices.add(vm.host)
+            if vm.host and vm.host.id not in visited_ids:
+                nodes.append(vm.host)
+                visited_ids.add(vm.host.id)
+
+        current = 0
+        while current < len(nodes):
+            node = nodes[current]
+            apps.update(BusinessApplication.objects.filter(Q(devices=node) | Q(virtual_machines__device=node)))
+
+            for cable_termination in node.cabletermination_set.all():
+                for termination in cable_termination.cable.b_terminations:
+                    if hasattr(termination, 'device') and termination.device and termination.device.id not in visited_ids:
+                        nodes.append(termination.device)
+                        visited_ids.add(termination.device.id)
+                for termination in cable_termination.cable.a_terminations:
+                    if hasattr(termination, 'device') and termination.device and termination.device.role == node.role and termination.device.id not in visited_ids:
+                        nodes.append(termination.device)
+                        visited_ids.add(termination.device.id)
+            current += 1
+
+        related_apps_via_vm = BusinessApplication.objects.filter(virtual_machines__in=vms).distinct()
 
         return self.render(
             'business_application/extend.html',
             extra_context={
                 'related_appcodes': BusinessApplicationTable(related_apps_via_vm),
-                'downstream_appcodes': BusinessApplicationTable(list(downstream_apps)),
+                'downstream_appcodes': BusinessApplicationTable(list(apps)),
             }
         )
 
