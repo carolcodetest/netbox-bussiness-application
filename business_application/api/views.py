@@ -52,6 +52,7 @@ class DeviceDownstreamAppsViewSet(ModelViewSet):
             for termination in node.cabletermination_set.all():
                 cable = termination.cable
                 for t in cable.a_terminations + cable.b_terminations:
+                    # Changed here: check t.device.id
                     if hasattr(t, 'device') and t.device and t.device.id not in visited_ids:
                         nodes.append(t.device)
                         visited_ids.add(t.device.id)
@@ -111,10 +112,10 @@ class ClusterDownstreamAppsViewSet(ModelViewSet):
 
         for vm in virtual_machines:
             apps.update(BusinessApplication.objects.filter(virtual_machines=vm))
-            if vm.host and vm.host not in processed_devices:
-                
-                nodes = [vm.host]
-                visited_ids = {vm.host.id}
+            # CHANGE: vm.host changed to vm.device
+            if vm.device and vm.device.id not in processed_devices:
+                nodes = [vm.device] # Changed here
+                visited_ids = {vm.device.id} # Changed here
                 current = 0
                 while current < len(nodes):
                     node = nodes[current]
@@ -126,11 +127,12 @@ class ClusterDownstreamAppsViewSet(ModelViewSet):
                     for termination in node.cabletermination_set.all():
                         cable = termination.cable
                         for t in cable.a_terminations + cable.b_terminations:
+                            # Changed here: check t.device.id
                             if hasattr(t, 'device') and t.device and t.device.id not in visited_ids:
                                 nodes.append(t.device)
                                 visited_ids.add(t.device.id)
                     current += 1
-                processed_devices.add(vm.host)
+                processed_devices.add(vm.device.id) # Changed here
         return apps
 
     def retrieve(self, request, pk=None):

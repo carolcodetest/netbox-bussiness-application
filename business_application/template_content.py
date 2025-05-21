@@ -73,49 +73,51 @@ class VMAppCodeExtension(AppCodeExtension):
 
 class ClusterAppCodeExtension(AppCodeExtension):
     model = 'virtualization.cluster'
+
     def right_page(self):
         obj = self.context['object']
-        vms = VirtualMachine.objects.filter(cluster=obj)
 
-        related_apps_via_vm = BusinessApplication.objects.filter(virtual_machines__in=vms).distinct()
+        vms_in_cluster = VirtualMachine.objects.filter(cluster=obj)
+        related_apps_via_vm = BusinessApplication.objects.filter(
+            virtual_machines__in=vms_in_cluster
+        ).distinct()
 
-        downstream_apps = set()
-        processed_devices = set()
-        
-        for vm in vms:
-            apps_on_vm = BusinessApplication.objects.filter(virtual_machines=vm)
-            downstream_apps.update(apps_on_vm)
+        downstream_apps_set = set()
+        processed_devices_ids = set()
 
-            if vm.host and vm.host.id not in processed_devices:
-                nodes_to_traverse = [vm.host]
-                current_device_index = 0
-                temp_visited_ids = {vm.host.id}
+        for vm in vms_in_cluster:
+            downstream_apps_set.update(BusinessApplication.objects.filter(virtual_machines=vm))
 
-                while current_device_index < len(nodes_to_traverse):
-                    current_node = nodes_to_traverse[current_device_index]
-                    
-                    apps_on_device = BusinessApplication.objects.filter(
-                        Q(devices=current_node) | Q(virtual_machines__device=current_node)
-                    )
-                    downstream_apps.update(apps_on_device)
-                    
-                    for termination in current_node.cabletermination_set.all():
+            
+            if vm.device and vm.device.id not in processed_devices_ids:
+                nodes_to_traverse = [vm.device]
+                temp_visited_ids_for_path = {vm.device.id}
+                current_node_index = 0
+
+                while current_node_index < len(nodes_to_traverse):
+                    current_device_node = nodes_to_traverse[current_node_index]
+
+                    downstream_apps_set.update(BusinessApplication.objects.filter(
+                        Q(devices=current_device_node) | Q(virtual_machines__device=current_device_node)
+                    ))
+
+                    for termination in current_device_node.cabletermination_set.all():
                         cable = termination.cable
-                        for t in cable.a_terminations.all() + cable.b_terminations.all():
-                            if hasattr(t, 'device') and t.device and t.device.id not in temp_visited_ids:
-                                nodes_to_traverse.append(t.device)
-                                temp_visited_ids.add(t.device.id)
-                    current_device_index += 1
-                processed_devices.add(vm.host)
+                        for connected_termination in cable.a_terminations.all() + cable.b_terminations.all():
+                            if hasattr(connected_termination, 'device') and connected_termination.device:
+                                if connected_termination.device.id not in temp_visited_ids_for_path:
+                                    nodes_to_traverse.append(connected_termination.device)
+                                    temp_visited_ids_for_path.add(connected_termination.device.id)
+                    current_node_index += 1
+                processed_devices_ids.add(vm.device.id)
 
         return self.render(
             'business_application/extend.html',
             extra_context={
-                'related_appcodes': BusinessApplicationTable(related_apps_via_vm), # Pass the related apps
-                'downstream_appcodes': BusinessApplicationTable(list(downstream_apps)), # Pass the downstream apps
+                'related_appcodes': BusinessApplicationTable(related_apps_via_vm),
+                'downstream_appcodes': BusinessApplicationTable(list(downstream_apps_set)),
             }
         )
-
 
 template_extensions = [
     DeviceAppCodeExtension,
