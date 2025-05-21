@@ -90,8 +90,8 @@ class ClusterAppCodeExtension(AppCodeExtension):
 
             
             if vm.device and vm.device.id not in processed_devices_ids:
-                nodes_to_traverse = [vm.device] # Changed here
-                temp_visited_ids_for_path = {vm.device.id} # Changed here
+                nodes_to_traverse = [vm.device]
+                temp_visited_ids_for_path = {vm.device.id}
                 current_node_index = 0
 
                 while current_node_index < len(nodes_to_traverse):
@@ -105,12 +105,11 @@ class ClusterAppCodeExtension(AppCodeExtension):
                         cable = termination.cable
                         for connected_termination in cable.a_terminations.all() + cable.b_terminations.all():
                             if hasattr(connected_termination, 'device') and connected_termination.device:
-                                # Changed here: check .device.id
                                 if connected_termination.device.id not in temp_visited_ids_for_path:
                                     nodes_to_traverse.append(connected_termination.device)
                                     temp_visited_ids_for_path.add(connected_termination.device.id)
                     current_node_index += 1
-                processed_devices_ids.add(vm.device.id) # Changed here
+                processed_devices_ids.add(vm.device.id)
 
         return self.render(
             'business_application/extend.html',
