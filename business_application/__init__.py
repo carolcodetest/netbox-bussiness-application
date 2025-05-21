@@ -1,5 +1,4 @@
 from netbox.plugins import PluginConfig
-from .template_content import DeviceAppCodeExtension, VMAppCodeExtension, ClusterAppCodeExtension
 class BusinessApplicationConfig(PluginConfig):
     name = "business_application"  # Must match the plugin directory name
     verbose_name = "Business Application"
@@ -13,8 +12,3 @@ class BusinessApplicationConfig(PluginConfig):
     }
 # Required for NetBox to recognize the plugin
 config = BusinessApplicationConfig
-template_extensions = [
-    DeviceAppCodeExtension,
-    VMAppCodeExtension,
-    ClusterAppCodeExtension,
-]
