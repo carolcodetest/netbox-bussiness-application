@@ -3,6 +3,8 @@ from django.db.models import Q
 
 from .models import BusinessApplication
 from .tables import BusinessApplicationTable
+from virtualization.models import VirtualMachine
+from dcim.models import Device
 
 class AppCodeExtension(PluginTemplateExtension):
     def left_page(self):
@@ -69,7 +71,54 @@ class VMAppCodeExtension(AppCodeExtension):
             BusinessApplication.objects.filter(virtual_machines=obj)
         )
 
+class ClusterAppCodeExtension(AppCodeExtension):
+    model = 'virtualization.cluster'
+    def right_page(self):
+        obj = self.context['object']
+        vms = VirtualMachine.objects.filter(cluster=obj)
+
+        related_apps_via_vm = BusinessApplication.objects.filter(virtual_machines__in=vms).distinct()
+
+        downstream_apps = set()
+        processed_devices = set()
+        
+        for vm in vms:
+            apps_on_vm = BusinessApplication.objects.filter(virtual_machines=vm)
+            downstream_apps.update(apps_on_vm)
+
+            if vm.host and vm.host.id not in processed_devices:
+                nodes_to_traverse = [vm.host]
+                current_device_index = 0
+                temp_visited_ids = {vm.host.id}
+
+                while current_device_index < len(nodes_to_traverse):
+                    current_node = nodes_to_traverse[current_device_index]
+                    
+                    apps_on_device = BusinessApplication.objects.filter(
+                        Q(devices=current_node) | Q(virtual_machines__device=current_node)
+                    )
+                    downstream_apps.update(apps_on_device)
+                    
+                    for termination in current_node.cabletermination_set.all():
+                        cable = termination.cable
+                        for t in cable.a_terminations.all() + cable.b_terminations.all():
+                            if hasattr(t, 'device') and t.device and t.device.id not in temp_visited_ids:
+                                nodes_to_traverse.append(t.device)
+                                temp_visited_ids.add(t.device.id)
+                    current_device_index += 1
+                processed_devices.add(vm.host)
+
+        return self.render(
+            'business_application/extend.html',
+            extra_context={
+                'related_appcodes': BusinessApplicationTable(related_apps_via_vm), # Pass the related apps
+                'downstream_appcodes': BusinessApplicationTable(list(downstream_apps)), # Pass the downstream apps
+            }
+        )
+
+
 template_extensions = [
     DeviceAppCodeExtension,
-    VMAppCodeExtension
+    VMAppCodeExtension,
+    ClusterAppCodeExtension,
 ]
