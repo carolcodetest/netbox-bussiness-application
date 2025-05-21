@@ -113,7 +113,7 @@ class ClusterAppCodeExtension(AppCodeExtension):
                 processed_devices_ids.add(vm.host.id)
 
         return self.render(
-            'business_application/extend.html', # THIS IS THE CRUCIAL LINE: Use the template for tables
+            'business_application/extend.html',
             extra_context={
                 'related_appcodes': BusinessApplicationTable(related_apps_via_vm),
                 'downstream_appcodes': BusinessApplicationTable(list(downstream_apps_set)), # Convert set to list for table
