@@ -86,7 +86,7 @@ class ClusterAppCodeExtension(AppCodeExtension):
         return self.render(
             'business_application/extend.html',
             extra_context={
-                'related_appcodes': [],
+                'related_appcodes': BusinessApplicationTable(list(related_apps_via_vm)),
                 'downstream_appcodes': BusinessApplicationTable(list(related_apps_via_vm)),
             }
         )
