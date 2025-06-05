@@ -82,31 +82,12 @@ class ClusterAppCodeExtension(AppCodeExtension):
             virtual_machines__in=vms_in_cluster
         ).distinct()
 
-        downstream_apps_set = set()
-        processed_devices_ids = set()
-
-        for vm in vms_in_cluster:
-            downstream_apps_set.update(BusinessApplication.objects.filter(virtual_machines=vm))        
-            if vm.device and vm.device.id not in processed_devices_ids:
-                nodes_to_traverse = [vm.device]
-                temp_visited_ids_for_path = {vm.device.id}
-                current_node_index = 0
-
-                while current_node_index < len(nodes_to_traverse):
-                    current_device_node = nodes_to_traverse[current_node_index]
-
-                    downstream_apps_set.update(BusinessApplication.objects.filter(
-                        Q(devices=current_device_node) | Q(virtual_machines__device=current_device_node)
-                    ))
-
-                    current_node_index += 1
-                processed_devices_ids.add(vm.device.id)
 
         return self.render(
             'business_application/extend.html',
             extra_context={
-                'related_appcodes': BusinessApplicationTable(related_apps_via_vm),
-                'downstream_appcodes': BusinessApplicationTable(list(downstream_apps_set)),
+                'related_appcodes': [],
+                'downstream_appcodes': BusinessApplicationTable(list(related_apps_via_vm)),
             }
         )
 

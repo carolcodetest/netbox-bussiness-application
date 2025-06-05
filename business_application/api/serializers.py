@@ -16,8 +16,4 @@ class BusinessApplicationSerializer(serializers.ModelSerializer):
             'owner',
             'delegate',
             'servicenow',
-            'virtual_machines',  # Assumes virtual_machines is a ManyToMany field
         ]
-        extra_kwargs = {
-            'virtual_machines': {'read_only': True},
-        }
